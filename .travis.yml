@@ -7,8 +7,8 @@ os:
 
 go:
   - tip
-  - 1.12
-  - 1.11
+  - 1.13.x
+  - 1.11.x
 
 script:
   - GO111MODULE=on go test -v -coverprofile=coverage.txt -covermode=atomic ./...
