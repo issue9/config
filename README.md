@@ -1,5 +1,5 @@
 conv
-[![Build Status](https://travis-ci.org/issue9/config.svg?branch=master)](https://travis-ci.org/issue9/config)
+[![Go](https://github.com/issue9/config/workflows/Go/badge.svg)](https://github.com/issue9/config/actions?query=workflow%3AGo)
 ======
 
 安装
@@ -13,7 +13,7 @@ go get github.com/issue9/config
 ---
 
 [![Go Walker](http://gowalker.org/api/v1/badge)](http://gowalker.org/github.com/issue9/config)
-[![GoDoc](https://godoc.org/github.com/issue9/config?status.svg)](https://godoc.org/github.com/issue9/config)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/issue9/config)](https://pkg.go.dev/github.com/issue9/config)
 
 版权
 ---
