@@ -1,6 +1,4 @@
-// Copyright 2018 by caixw, All rights reserved.
-// Use of this source code is governed by a MIT
-// license that can be found in the LICENSE file.
+// SPDX-License-Identifier: MIT
 
 package config
 
@@ -16,7 +14,9 @@ import (
 
 var errExtNotAllowEmpty = errors.New("扩展名不能为空")
 
-// Sanitizer 如果对象实现了该方法，那么在解析完之后，
+// Sanitizer 对配置项的作检测和清理
+//
+// 如果对象实现了该方法，那么在解析完之后，
 // 会调用该接口的函数对数据进行修正和检测。
 type Sanitizer interface {
 	// 对对象的各个字段进行检测，如果可以调整，则调整。
@@ -25,7 +25,7 @@ type Sanitizer interface {
 	Sanitize() error
 }
 
-// Manager 对 UnmarshalFunc 与扩展名的关联管理。
+// Manager 对 UnmarshalFunc 与扩展名的关联管理
 type Manager struct {
 	dir        string
 	unmarshals map[string]UnmarshalFunc
@@ -73,7 +73,7 @@ func (mgr *Manager) AddUnmarshal(m UnmarshalFunc, ext ...string) error {
 	return nil
 }
 
-// SetUnmarshal 修改指定扩展名关联的解析函数，不存在则添加。
+// SetUnmarshal 修改或添加指定扩展名关联的解析函数
 func (mgr *Manager) SetUnmarshal(m UnmarshalFunc, ext ...string) error {
 	for _, e := range ext {
 		if e == "" || e == "." {
