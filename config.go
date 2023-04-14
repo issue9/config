@@ -37,6 +37,9 @@ func AppDir(dir string) (*Config, error) {
 }
 
 // WDDir 将工作目录作为配置文件的保存目录
+//
+// dir 相对的目录名称；
+// 根据 [os.Getwd] 定位目录。
 func WDDir(dir string) (*Config, error) { return New(dir, os.Getwd) }
 
 // Dir 以指定的目录作为配置文件的保存位置
