@@ -17,27 +17,45 @@ type Config struct {
 	s    Serializer
 }
 
-// New 声明 Config 对象
+// SystemDir 将系统提供的配置目录下的 dir 作为配置目录
 //
-// 这将会在 $CONFIG/vendor/name 目录下操作项目的配置文件。
-// $CONFIG 为系统规定的配置目录，比如 $XDG_CONFIG 等，各系统有所不同。
-//
-// name 为应用的名称；
-// vendor 表示厂商名称，可以为空；
-func New(name, vendor string) (*Config, error) {
-	dir, err := os.UserConfigDir()
-	if err != nil {
-		return nil, err
-	}
-	return newConfig(filepath.Join(dir, vendor, name)), nil
+// dir 相对的目录名称；
+// 根据 [os.UserConfigDir] 定位目录。
+func SystemDir(dir string) (*Config, error) {
+	return newConfig(dir, os.UserConfigDir)
 }
 
-func newConfig(dir string) *Config {
+// AppDir 将应用程序下的 dir 作为配置文件的保存目录
+//
+// dir 相对的目录名称；
+// 根据 [os.Executable] 定位目录。
+func AppDir(dir string) (*Config, error) {
+	return newConfig(dir, os.Executable)
+}
+
+// Dir 以指定的目录作为配置文件的保存位置
+func Dir(dir string) *Config {
+	c, _ := newConfig(dir, nil)
+	return c
+}
+
+func newConfig(dir string, parent func() (string, error)) (*Config, error) {
+	if parent != nil {
+		p, err := parent()
+		if err != nil {
+			return nil, err
+		}
+
+		if p != "" {
+			dir = filepath.Join(p, dir)
+		}
+	}
+
 	return &Config{
 		fsys: os.DirFS(dir),
 		dir:  dir,
 		s:    make(Serializer, 5),
-	}
+	}, nil
 }
 
 // Exists 是否存在指定的文件

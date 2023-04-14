@@ -23,7 +23,7 @@ type conf struct {
 func TestConfig(t *testing.T) {
 	a := assert.New(t, false)
 
-	c := newConfig("./testdata")
+	c := Dir("./testdata")
 	a.NotNil(c)
 	a.True(c.Exists("config.xml")).False(c.Exists("not-exists.xml"))
 
