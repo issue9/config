@@ -67,21 +67,23 @@ func (f *Config) Exists(name string) bool {
 // Open 实现 [fs.FS] 接口
 func (f *Config) Open(name string) (fs.File, error) { return f.fsys.Open(name) }
 
+// Dir 配置文件的目录
+func (f *Config) Dir() string { return f.dir }
+
 // Load 加载指定名称的文件内容至 v
 //
 // 根据文件扩展名决定采用什么编码方法；
 // name 为文件名，相对于项目的文件夹；
 func (f *Config) Load(name string, v interface{}) error {
-	s := f.s.searchByExt(name)
-	if s == nil {
-		return ErrSerializerNotFound()
+	if _, u := f.s.GetByFilename(name); u != nil {
+		data, err := f.Read(name)
+		if err != nil {
+			return err
+		}
+		return u(data, v)
 	}
 
-	data, err := f.Read(name)
-	if err != nil {
-		return err
-	}
-	return s.Unmarshal(data, v)
+	return ErrSerializerNotFound()
 }
 
 // Read 读取文件的原始内容
@@ -92,14 +94,13 @@ func (f *Config) Read(name string) ([]byte, error) { return fs.ReadFile(f, name)
 // 根据文件扩展名决定采用什么编码方法；
 // mode 表示文件的权限，仅对新建文件时有效；
 func (f *Config) Save(name string, v interface{}, mode fs.FileMode) error {
-	s := f.s.searchByExt(name)
-	if s == nil {
-		return ErrSerializerNotFound()
+	if m, _ := f.s.GetByFilename(name); m != nil {
+		data, err := m(v)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(filepath.Join(f.dir, name), data, mode)
 	}
 
-	data, err := s.Marshal(v)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(filepath.Join(f.dir, name), data, mode)
+	return ErrSerializerNotFound()
 }

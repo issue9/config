@@ -45,7 +45,7 @@ func TestSerializer(t *testing.T) {
 
 		s.Delete(".json", ".mjs")
 		a.Equal(1, s.Len())
-		a.NotNil(s.searchByExt("abc.js")).
-			Nil(s.searchByExt(".json"))
+		a.NotNil(s.GetByFilename("abc.js")).
+			Nil(s.GetByFilename(".json"))
 	})
 }

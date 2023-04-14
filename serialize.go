@@ -25,6 +25,7 @@ type serializer struct {
 // 扩展名必须以 . 开头，如果未带 .，则会自动加上。
 type Serializer map[string]*serializer
 
+// ErrSerializerNotFound 表示未找到序列化方法的错误
 func ErrSerializerNotFound() error { return errSerializerNotFound }
 
 // Serializer 返回管理配置文件序列化的对象
@@ -62,11 +63,22 @@ func (s Serializer) Delete(ext ...string) {
 	}
 }
 
-func (s Serializer) Len() int { return len(s) }
-
-func (s Serializer) searchByExt(name string) *serializer {
-	return s[filepath.Ext(name)]
+// Get 获取指定扩展名对应的序列化方法
+//
+// 如果不存在，则返回 nil。
+func (s Serializer) Get(ext string) (MarshalFunc, UnmarshalFunc) {
+	if ss, found := s[buildExt(ext)]; found {
+		return ss.Marshal, ss.Unmarshal
+	}
+	return nil, nil
 }
+
+// GetByFilename 通过文件查找对应的序列化方法
+func (s Serializer) GetByFilename(name string) (MarshalFunc, UnmarshalFunc) {
+	return s.Get(filepath.Ext(name))
+}
+
+func (s Serializer) Len() int { return len(s) }
 
 func buildExt(e string) string {
 	if len(e) == 0 {

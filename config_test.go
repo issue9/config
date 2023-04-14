@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"io/fs"
+	"strings"
 	"testing"
 
 	"github.com/issue9/assert/v3"
@@ -18,6 +19,13 @@ type conf struct {
 	Debug   bool     `json:"debug" xml:"debug,attr"`
 	Port    int      `json:"port" xml:"port,attr"`
 	Cert    string   `json:"cert" xml:"cert"`
+}
+
+func TestAppDir(t *testing.T) {
+	a := assert.New(t, false)
+	c, err := AppDir("config")
+	a.NotError(err).NotNil(c).
+		True(strings.HasSuffix(c.Dir(), "config"))
 }
 
 func TestConfig(t *testing.T) {
