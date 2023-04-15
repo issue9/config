@@ -23,7 +23,7 @@ type conf struct {
 
 func TestAppDir(t *testing.T) {
 	a := assert.New(t, false)
-	c, err := AppDir("config")
+	c, err := AppDir(nil, "config")
 	a.NotError(err).NotNil(c).
 		True(strings.HasSuffix(c.Dir(), "config"))
 }
@@ -31,7 +31,7 @@ func TestAppDir(t *testing.T) {
 func TestConfig(t *testing.T) {
 	a := assert.New(t, false)
 
-	c := Dir("./testdata")
+	c := Dir(nil, "./testdata")
 	a.NotNil(c)
 	a.True(c.Exists("config.xml")).False(c.Exists("not-exists.xml"))
 

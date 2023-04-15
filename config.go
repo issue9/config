@@ -19,7 +19,7 @@ type Config struct {
 
 // BuildDir 根据 dir 生成不同的 Config
 //
-// dir 为配置目录的地址，可以带以下的特殊前缀：
+// dir 为项目的配置文件目录，后续通过 [Config] 操作的文件都是基于此目录的。可以带以下的特殊前缀：
 //   - ~ 表示系统提供的配置文件目录，比如 Linux 的 XDG_CONFIG、Window 的 AppData 等；
 //   - @ 表示当前程序的主目录；
 //   - ^ 表示绝对路径；
@@ -27,37 +27,37 @@ type Config struct {
 //   - 其它则是直接采用 [Dir] 初始化。
 //
 // 这是对 [SystemDir]、[AppDir]、[Dir] 和 [WDDir] 的合并处理。
-func BuildDir(dir string) (*Config, error) {
+func BuildDir(s Serializer, dir string) (*Config, error) {
 	if len(dir) == 0 {
-		return Dir(dir), nil
+		return Dir(s, dir), nil
 	}
 
 	switch dir[0] {
 	case '@':
-		return AppDir(dir[1:])
+		return AppDir(s, dir[1:])
 	case '~':
-		return SystemDir(dir[1:])
+		return SystemDir(s, dir[1:])
 	case '^':
-		return Dir(dir[1:]), nil
+		return Dir(s, dir[1:]), nil
 	case '#':
-		return WDDir(dir[1:])
+		return WDDir(s, dir[1:])
 	default:
-		return Dir(dir), nil
+		return Dir(s, dir), nil
 	}
 }
 
 // SystemDir 将系统提供的配置目录下的 dir 作为配置目录
 //
-// dir 相对的目录名称；
-// 根据 [os.UserConfigDir] 定位目录。
-func SystemDir(dir string) (*Config, error) { return New(dir, os.UserConfigDir) }
+// dir 相对的 [os.UserConfigDir] 目录名称；
+func SystemDir(s Serializer, dir string) (*Config, error) {
+	return New(s, dir, os.UserConfigDir)
+}
 
 // AppDir 将应用程序下的 dir 作为配置文件的保存目录
 //
-// dir 相对的目录名称；
-// 根据 [os.Executable] 定位目录。
-func AppDir(dir string) (*Config, error) {
-	return New(dir, func() (string, error) {
+// dir 相对 [os.Executable] 的目录名称；
+func AppDir(s Serializer, dir string) (*Config, error) {
+	return New(s, dir, func() (string, error) {
 		ex, err := os.Executable()
 		return filepath.Dir(ex), err
 	})
@@ -65,13 +65,14 @@ func AppDir(dir string) (*Config, error) {
 
 // WDDir 将工作目录作为配置文件的保存目录
 //
-// dir 相对的目录名称；
-// 根据 [os.Getwd] 定位目录。
-func WDDir(dir string) (*Config, error) { return New(dir, os.Getwd) }
+// dir 相对 [os.Getwd] 的目录名称；
+func WDDir(s Serializer, dir string) (*Config, error) {
+	return New(s, dir, os.Getwd)
+}
 
 // Dir 以指定的目录作为配置文件的保存位置
-func Dir(dir string) *Config {
-	c, _ := New(dir, nil)
+func Dir(s Serializer, dir string) *Config {
+	c, _ := New(s, dir, nil)
 	return c
 }
 
@@ -80,7 +81,7 @@ func Dir(dir string) *Config {
 // dir 表示当前项目的配置文件存放的目录名称，一般和项目名称相同；
 // parent 表示获取系统中用于存放配置文件的目录，比如 Linux 中的 XDG_CONFIG 等目录。
 // 用户可以根据自己的需求自行实现该方法，如果为 nil，表示直接将 dir 作为全路径进行处理。
-func New(dir string, parent func() (string, error)) (*Config, error) {
+func New(s Serializer, dir string, parent func() (string, error)) (*Config, error) {
 	if parent != nil {
 		p, err := parent()
 		if err != nil {
@@ -92,10 +93,14 @@ func New(dir string, parent func() (string, error)) (*Config, error) {
 		}
 	}
 
+	if s == nil {
+		s = make(Serializer, 5)
+	}
+
 	return &Config{
 		fsys: os.DirFS(dir),
 		dir:  dir,
-		s:    make(Serializer, 5),
+		s:    s,
 	}, nil
 }
 
