@@ -5,6 +5,8 @@ package config
 import (
 	"errors"
 	"fmt"
+	"io/fs"
+	"os"
 	"path/filepath"
 )
 
@@ -89,4 +91,39 @@ func buildExt(e string) string {
 		e = "." + e
 	}
 	return e
+}
+
+// Marshal 将 v 按 path 的后缀名序列化并保存
+func (s Serializer) Marshal(path string, v interface{}, mode fs.FileMode) error {
+	if m, _ := s.GetByFilename(path); m != nil {
+		data, err := m(v)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(path, data, mode)
+	}
+
+	return ErrSerializerNotFound()
+}
+
+// Unmarshal 根据 path 后缀名序列化其内容至 v
+func (s Serializer) Unmarshal(path string, v interface{}) error {
+	return s.unmarshal(path, v, func() ([]byte, error) { return os.ReadFile(path) })
+}
+
+// UnmarshalFS 根据 name 后缀名序列化其内容至 v
+func (s Serializer) UnmarshalFS(fsys fs.FS, name string, v interface{}) error {
+	return s.unmarshal(name, v, func() ([]byte, error) { return fs.ReadFile(fsys, name) })
+}
+
+func (s Serializer) unmarshal(filename string, v interface{}, read func() ([]byte, error)) error {
+	if _, u := s.GetByFilename(filename); u != nil {
+		data, err := read()
+		if err != nil {
+			return err
+		}
+		return u(data, v)
+	}
+
+	return ErrSerializerNotFound()
 }
