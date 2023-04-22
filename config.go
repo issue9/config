@@ -78,7 +78,7 @@ func Dir(s Serializer, dir string) *Config {
 
 // New 声明 Config 对象
 //
-// dir 表示当前项目的配置文件存放的目录名称，一般和项目名称相同；
+// dir 表示当前项目的配置文件存放的目录名称；
 // parent 表示获取系统中用于存放配置文件的目录，比如 Linux 中的 XDG_CONFIG 等目录。
 // 用户可以根据自己的需求自行实现该方法，如果为 nil，表示直接将 dir 作为全路径进行处理。
 func New(s Serializer, dir string, parent func() (string, error)) (*Config, error) {
@@ -97,6 +97,14 @@ func New(s Serializer, dir string, parent func() (string, error)) (*Config, erro
 		s = make(Serializer, 5)
 	}
 
+	if _, err := os.Stat(dir); errors.Is(err, fs.ErrNotExist) {
+		if err := os.MkdirAll(dir, fs.ModePerm); err != nil {
+			return nil, err
+		}
+	} else if err != nil {
+		return nil, err
+	}
+
 	return &Config{
 		fsys: os.DirFS(dir),
 		dir:  dir,
@@ -106,7 +114,7 @@ func New(s Serializer, dir string, parent func() (string, error)) (*Config, erro
 
 // Exists 是否存在指定的文件
 func (f *Config) Exists(name string) bool {
-	_, err := fs.Stat(f.fsys, name)
+	_, err := fs.Stat(f, name)
 	return !errors.Is(err, fs.ErrNotExist)
 }
 
