@@ -126,10 +126,21 @@ func (f *Config) Dir() string { return f.dir }
 
 // Load 加载指定名称的文件内容至 v
 //
-// 根据文件扩展名决定采用什么编码方法；
-// name 为文件名，相对于项目的文件夹；
+// name 为文件名，相对于 [Config.Dir]，根据文件扩展名决定采用什么编码方法；
+// 如果 v 实现了 [Sanitizer]，在加载之后会调用该接口对数据进行处理；
 func (f *Config) Load(name string, v interface{}) error {
-	return f.s.Unmarshal(filepath.Join(f.Dir(), name), v)
+	path := filepath.Join(f.Dir(), name)
+	if err := f.s.Unmarshal(path, v); err != nil {
+		return err
+	}
+
+	if s, ok := v.(Sanitizer); ok {
+		if fe := s.SanitizeConfig(); fe != nil {
+			fe.Path = path
+			return fe
+		}
+	}
+	return nil
 }
 
 // Read 读取文件的原始内容
@@ -139,6 +150,13 @@ func (f *Config) Read(name string) ([]byte, error) { return fs.ReadFile(f, name)
 //
 // 根据文件扩展名决定采用什么编码方法；
 // mode 表示文件的权限，仅对新建文件时有效；
+// 如果 v 实现了 [Sanitizer]，在保存之前会调用该接口对数据进行处理；
 func (f *Config) Save(name string, v interface{}, mode fs.FileMode) error {
+	if s, ok := v.(Sanitizer); ok {
+		if fe := s.SanitizeConfig(); fe != nil {
+			fe.Path = filepath.Join(f.Dir(), name)
+			return fe
+		}
+	}
 	return f.s.Marshal(filepath.Join(f.Dir(), name), v, mode)
 }
