@@ -9,6 +9,9 @@ import (
 )
 
 // FieldError 表示配置内容字段错误
+//
+// 当前对象实现了 [localeutil.LocaleStringer] 接口，
+// 如果有需要可以添加以下翻译项：%s at %s:%s，分别对应 Message， Path 和 Field
 type FieldError struct {
 	Path    string      // 配置文件的路径
 	Field   string      // 字段名
