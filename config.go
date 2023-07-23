@@ -128,7 +128,7 @@ func (f *Config) Dir() string { return f.dir }
 //
 // name 为文件名，相对于 [Config.Dir]，根据文件扩展名决定采用什么编码方法；
 // 如果 v 实现了 [Sanitizer]，在加载之后会调用该接口对数据进行处理；
-func (f *Config) Load(name string, v interface{}) error {
+func (f *Config) Load(name string, v any) error {
 	path := filepath.Join(f.Dir(), name)
 	if err := f.s.Unmarshal(path, v); err != nil {
 		return err
@@ -151,7 +151,7 @@ func (f *Config) Read(name string) ([]byte, error) { return fs.ReadFile(f, name)
 // 根据文件扩展名决定采用什么编码方法；
 // mode 表示文件的权限，仅对新建文件时有效；
 // 如果 v 实现了 [Sanitizer]，在保存之前会调用该接口对数据进行处理；
-func (f *Config) Save(name string, v interface{}, mode fs.FileMode) error {
+func (f *Config) Save(name string, v any, mode fs.FileMode) error {
 	if s, ok := v.(Sanitizer); ok {
 		if fe := s.SanitizeConfig(); fe != nil {
 			fe.Path = filepath.Join(f.Dir(), name)

@@ -12,9 +12,9 @@ import (
 
 var errSerializerNotFound = errors.New("serializer not found")
 
-type UnmarshalFunc func([]byte, interface{}) error
+type UnmarshalFunc func([]byte, any) error
 
-type MarshalFunc func(interface{}) ([]byte, error)
+type MarshalFunc func(any) ([]byte, error)
 
 type serializer struct {
 	Marshal   MarshalFunc
@@ -94,7 +94,7 @@ func buildExt(e string) string {
 }
 
 // Marshal 将 v 按 path 的后缀名序列化并保存
-func (s Serializer) Marshal(path string, v interface{}, mode fs.FileMode) error {
+func (s Serializer) Marshal(path string, v any, mode fs.FileMode) error {
 	if m, _ := s.GetByFilename(path); m != nil {
 		data, err := m(v)
 		if err != nil {
@@ -107,16 +107,16 @@ func (s Serializer) Marshal(path string, v interface{}, mode fs.FileMode) error 
 }
 
 // Unmarshal 根据 path 后缀名序列化其内容至 v
-func (s Serializer) Unmarshal(path string, v interface{}) error {
+func (s Serializer) Unmarshal(path string, v any) error {
 	return s.unmarshal(path, v, func() ([]byte, error) { return os.ReadFile(path) })
 }
 
 // UnmarshalFS 根据 name 后缀名序列化其内容至 v
-func (s Serializer) UnmarshalFS(fsys fs.FS, name string, v interface{}) error {
+func (s Serializer) UnmarshalFS(fsys fs.FS, name string, v any) error {
 	return s.unmarshal(name, v, func() ([]byte, error) { return fs.ReadFile(fsys, name) })
 }
 
-func (s Serializer) unmarshal(filename string, v interface{}, read func() ([]byte, error)) error {
+func (s Serializer) unmarshal(filename string, v any, read func() ([]byte, error)) error {
 	if _, u := s.GetByFilename(filename); u != nil {
 		data, err := read()
 		if err != nil {

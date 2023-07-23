@@ -13,10 +13,10 @@ import (
 // 当前对象实现了 [localeutil.LocaleStringer] 接口，
 // 如果有需要可以添加以下翻译项：%s at %s:%s，分别对应 Message， Path 和 Field
 type FieldError struct {
-	Path    string      // 配置文件的路径
-	Field   string      // 字段名
-	Message interface{} // 错误信息
-	Value   interface{} // 字段的原始值
+	Path    string // 配置文件的路径
+	Field   string // 字段名
+	Message any    // 错误信息
+	Value   any    // 字段的原始值
 }
 
 // Sanitizer 对配置文件的数据验证和修正
@@ -28,7 +28,7 @@ type Sanitizer interface {
 //
 // field 表示错误的字段名；
 // msg 表示错误信息，可以是任意类型，如果类型为 FieldError，那么将调用 msg.AddFieldParent(field)；
-func NewFieldError(field string, msg interface{}) *FieldError {
+func NewFieldError(field string, msg any) *FieldError {
 	if err, ok := msg.(*FieldError); ok {
 		err.AddFieldParent(field)
 		return err
