@@ -1,7 +1,7 @@
-conv
+config
 ===
 
-[![Test](https://github.com/issue9/config/workflows/Test/badge.svg)](https://github.com/issue9/config/actions?query=workflow%3ATest)
+[![Go](https://github.com/issue9/config/actions/workflows/go.yml/badge.svg)](https://github.com/issue9/config/actions/workflows/go.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/issue9/config)](https://goreportcard.com/report/github.com/issue9/config)
 [![codecov](https://codecov.io/gh/issue9/config/branch/master/graph/badge.svg)](https://codecov.io/gh/issue9/config)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/issue9/config)](https://pkg.go.dev/github.com/issue9/config)

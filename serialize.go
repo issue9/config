@@ -3,14 +3,13 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
-)
 
-var errSerializerNotFound = errors.New("serializer not found")
+	"github.com/issue9/localeutil"
+)
 
 type UnmarshalFunc func([]byte, any) error
 
@@ -26,9 +25,6 @@ type serializer struct {
 // 根据配置文件的扩展查找相应的序列化方法，
 // 扩展名必须以 . 开头，如果未带 .，则会自动加上。
 type Serializer map[string]*serializer
-
-// ErrSerializerNotFound 表示未找到序列化方法的错误
-func ErrSerializerNotFound() error { return errSerializerNotFound }
 
 // Serializer 返回管理配置文件序列化的对象
 func (f *Config) Serializer() Serializer { return f.s }
@@ -103,7 +99,7 @@ func (s Serializer) Marshal(path string, v any, mode fs.FileMode) error {
 		return os.WriteFile(path, data, mode)
 	}
 
-	return ErrSerializerNotFound()
+	return localeutil.Error("not found serializer for %s", path)
 }
 
 // Unmarshal 根据 path 后缀名序列化其内容至 v
@@ -125,5 +121,5 @@ func (s Serializer) unmarshal(filename string, v any, read func() ([]byte, error
 		return u(data, v)
 	}
 
-	return ErrSerializerNotFound()
+	return localeutil.Error("not found serializer for %s", filename)
 }

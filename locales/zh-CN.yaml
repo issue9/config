@@ -1,0 +1,8 @@
+id: zh-CN
+messages:
+    - key: '%s at %s:%s'
+      message:
+        msg: '%s 位于 %s:%s'
+    - key: not found serializer for %s
+      message:
+        msg: 未找到适用 %s 的序列化方法

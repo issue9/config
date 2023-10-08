@@ -9,9 +9,6 @@ import (
 )
 
 // FieldError 表示配置内容字段错误
-//
-// 当前对象实现了 [localeutil.LocaleStringer] 接口，
-// 如果有需要可以添加以下翻译项：%s at %s:%s，分别对应 Message， Path 和 Field
 type FieldError struct {
 	Path    string // 配置文件的路径
 	Field   string // 字段名
@@ -27,7 +24,7 @@ type Sanitizer interface {
 // NewFieldError 返回表示配置文件错误的对象
 //
 // field 表示错误的字段名；
-// msg 表示错误信息，可以是任意类型，如果类型为 FieldError，那么将调用 msg.AddFieldParent(field)；
+// msg 表示错误信息，可以是任意类型，如果类型为 [FieldError]，那么将调用 msg.AddFieldParent(field)；
 func NewFieldError(field string, msg any) *FieldError {
 	if err, ok := msg.(*FieldError); ok {
 		err.AddFieldParent(field)
@@ -73,5 +70,5 @@ func (err *FieldError) LocaleString(p *localeutil.Printer) string {
 		msg = ls.LocaleString(p)
 	}
 
-	return p.Sprintf("%s at %s:%s", msg, err.Path, err.Field)
+	return localeutil.Phrase("%s at %s:%s", msg, err.Path, err.Field).LocaleString(p)
 }

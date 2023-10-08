@@ -39,7 +39,7 @@ func TestConfig(t *testing.T) {
 	a.NotError(err).NotNil(data)
 
 	obj := &conf{}
-	a.Equal(c.Load("config.json", obj), ErrSerializerNotFound())
+	a.ErrorString(c.Load("config.json", obj), "not found serializer for ")
 
 	c.Serializer().Add(xml.Marshal, xml.Unmarshal, ".xml").
 		Add(json.Marshal, json.Unmarshal, ".json", ".js")
