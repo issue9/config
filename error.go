@@ -66,7 +66,7 @@ func (err *FieldError) Error() string {
 
 func (err *FieldError) LocaleString(p *localeutil.Printer) string {
 	msg := err.Message
-	if ls, ok := err.Message.(localeutil.LocaleStringer); ok {
+	if ls, ok := err.Message.(localeutil.Stringer); ok {
 		msg = ls.LocaleString(p)
 	}
 

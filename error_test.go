@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	_ error                     = &FieldError{}
-	_ localeutil.LocaleStringer = &FieldError{}
+	_ error               = &FieldError{}
+	_ localeutil.Stringer = &FieldError{}
 )
 
 func TestNewFieldError(t *testing.T) {
