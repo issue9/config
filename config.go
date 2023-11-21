@@ -26,7 +26,7 @@ type Config struct {
 //   - ~ 表示系统提供的配置文件目录，比如 Linux 的 XDG_CONFIG、Window 的 AppData 等；
 //   - @ 表示当前程序的主目录；
 //   - ^ 表示绝对路径；
-//   - # 表示工作路径；
+//   - # 表示工作路径，这是一个随着工作目录变化的值，使用时需要小心；
 //   - 其它则是直接采用 [Dir] 初始化。
 //
 // 这是对 [SystemDir]、[AppDir]、[Dir] 和 [WDDir] 的合并处理。
