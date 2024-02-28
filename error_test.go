@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2019-2024 caixw
+//
 // SPDX-License-Identifier: MIT
 
 package config
@@ -5,7 +7,7 @@ package config
 import (
 	"testing"
 
-	"github.com/issue9/assert/v3"
+	"github.com/issue9/assert/v4"
 	"github.com/issue9/localeutil"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
