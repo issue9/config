@@ -22,7 +22,7 @@ type Config struct {
 	s    Serializer
 }
 
-// BuildDir 根据 dir 生成不同的 Config
+// BuildDir 根据 dir 生成不同的 [Config]
 //
 // dir 为项目的配置文件目录，后续通过 [Config] 操作的文件都是基于此目录的。可以带以下的特殊前缀：
 //   - ~ 表示系统提供的配置文件目录，比如 Linux 的 XDG_CONFIG、Window 的 AppData 等；
@@ -81,10 +81,10 @@ func Dir(s Serializer, dir string) *Config {
 	return c
 }
 
-// New 声明 Config 对象
+// New 声明 [Config] 对象
 //
-// dir 表示当前项目的配置文件存放的目录名称；
-// parent 表示获取系统中用于存放配置文件的目录，比如 Linux 中的 XDG_CONFIG 等目录。
+// dir 表示当前项目的配置文件存放的目录名称，如果 parent 不为空，为相对于 parent 返回值的路径；
+// parent 表示获取系统中用于存放配置文件的路径，比如 Linux 中的 XDG_CONFIG 等目录。
 // 用户可以根据自己的需求自行实现该方法，如果为 nil，表示直接将 dir 作为全路径进行处理。
 func New(s Serializer, dir string, parent func() (string, error)) (*Config, error) {
 	if parent != nil {
