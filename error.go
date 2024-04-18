@@ -20,6 +20,10 @@ type FieldError struct {
 
 // Sanitizer 对配置文件的数据验证和修正
 type Sanitizer interface {
+	// SanitizeConfig 验证当前对象的数据
+	//
+	// NOTE: 如果当前对象是个结构体，
+	// 需要接口的实现自行判断和调用各个字段 [Sanitizer] 接口。
 	SanitizeConfig() *FieldError
 }
 
