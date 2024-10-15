@@ -1,4 +1,6 @@
-id: cmn-Hans
+languages:
+    - cmn-Hans
+    - zh-Hans
 messages:
     - key: '%s at %s:%s'
       message:
