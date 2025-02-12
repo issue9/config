@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2019-2024 caixw
+// SPDX-FileCopyrightText: 2019-2025 caixw
 //
 // SPDX-License-Identifier: MIT
 
@@ -6,6 +6,7 @@ package config
 
 import (
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -13,14 +14,18 @@ import (
 	"github.com/issue9/localeutil"
 )
 
-type UnmarshalFunc func([]byte, any) error
+type (
+	UnmarshalFunc func([]byte, any) error
 
-type MarshalFunc func(any) ([]byte, error)
+	MarshalFunc func(any) ([]byte, error)
 
-type serializer struct {
-	Marshal   MarshalFunc
-	Unmarshal UnmarshalFunc
-}
+	OpenFile func(name string, flag int, perm fs.FileMode) (*os.File, error)
+
+	serializer struct {
+		Marshal   MarshalFunc
+		Unmarshal UnmarshalFunc
+	}
+)
 
 // Serializer 管理配置文件序列化的方法
 //
@@ -91,22 +96,39 @@ func buildExt(e string) string {
 	return e
 }
 
-// Marshal 将 v 按 path 的后缀名序列化并保存
-func (s Serializer) Marshal(path string, v any, mode fs.FileMode) error {
-	if m, _ := s.GetByFilename(path); m != nil {
+// Marshal 将 v 按 name 的后缀名序列化并保存
+func (s Serializer) Marshal(f OpenFile, name string, v any, mode fs.FileMode) error {
+	if m, _ := s.GetByFilename(name); m != nil {
 		data, err := m(v)
 		if err != nil {
 			return err
 		}
-		return os.WriteFile(path, data, mode)
+
+		f, err := f(name, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		if _, err = f.Write(data); err != nil {
+			return err
+		}
 	}
 
-	return localeutil.Error("not found serializer for %s", path)
+	return localeutil.Error("not found serializer for %s", name)
 }
 
-// Unmarshal 根据 path 后缀名序列化其内容至 v
-func (s Serializer) Unmarshal(path string, v any) error {
-	return s.unmarshal(path, v, func() ([]byte, error) { return os.ReadFile(path) })
+// Unmarshal 根据 name 后缀名序列化其内容至 v
+func (s Serializer) Unmarshal(f OpenFile, name string, v any) error {
+	return s.unmarshal(name, v, func() ([]byte, error) {
+		f, err := f(name, os.O_RDONLY, 0)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+
+		return io.ReadAll(f)
+	})
 }
 
 // UnmarshalFS 根据 name 后缀名序列化其内容至 v

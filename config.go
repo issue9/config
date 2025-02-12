@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2019-2024 caixw
+// SPDX-FileCopyrightText: 2019-2025 caixw
 //
 // SPDX-License-Identifier: MIT
 
@@ -16,16 +16,17 @@ import (
 )
 
 // Config 项目的配置文件管理
+//
+// 相对于 [Serializer]，Config 提供了对目录的保护，只能存储指定目录下的内容。
 type Config struct {
-	fsys fs.FS
-	dir  string // 配置文件的根目录
+	root *os.Root
 	s    Serializer
 }
 
 // BuildDir 根据 dir 生成不同的 [Config]
 //
-// dir 为项目的配置文件目录，后续通过 [Config] 操作的文件都是基于此目录的。可以带以下的特殊前缀：
-//   - ~ 表示系统提供的配置文件目录，比如 Linux 的 XDG_CONFIG、Window 的 AppData 等；
+// dir 为项目的配置文件目录，后续通过 [Config] 操作都被限制在此目录之下。可以带以下的特殊前缀：
+//   - ~ 表示系统提供的配置文件目录，比如 Linux 的 XDG_CONFIG、Windows 的 AppData 等；
 //   - @ 表示当前程序的主目录；
 //   - ^ 表示绝对路径；
 //   - # 表示工作路径，这是一个随着工作目录变化的值，使用时需要小心；
@@ -110,38 +111,38 @@ func New(s Serializer, dir string, parent func() (string, error)) (*Config, erro
 		return nil, err
 	}
 
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Config{
-		fsys: os.DirFS(dir),
-		dir:  dir,
+		root: root,
 		s:    s,
 	}, nil
 }
 
 // Exists 是否存在指定的文件
 func (f *Config) Exists(name string) bool {
-	_, err := fs.Stat(f, name)
+	_, err := f.Root().Stat(name)
 	return !errors.Is(err, fs.ErrNotExist)
 }
 
-// Open 实现 [fs.FS] 接口
-func (f *Config) Open(name string) (fs.File, error) { return f.fsys.Open(name) }
-
-// Dir 配置文件的目录
-func (f *Config) Dir() string { return f.dir }
+// Root 配置文件的目录
+func (f *Config) Root() *os.Root { return f.root }
 
 // Load 加载指定名称的文件内容至 v
 //
-// name 为文件名，相对于 [Config.Dir]，根据文件扩展名决定采用什么编码方法；
+// name 为文件名，相对于 [Config.Root]，根据文件扩展名决定采用什么编码方法；
 // 如果 v 实现了 [Sanitizer]，在加载之后会调用该接口对数据进行处理；
 func (f *Config) Load(name string, v any) error {
-	path := filepath.Join(f.Dir(), name)
-	if err := f.s.Unmarshal(path, v); err != nil {
+	if err := f.s.Unmarshal(f.Root().OpenFile, name, v); err != nil {
 		return err
 	}
 
 	if s, ok := v.(Sanitizer); ok {
 		if fe := s.SanitizeConfig(); fe != nil {
-			fe.Path = path
+			fe.Path = name
 			return fe
 		}
 	}
@@ -149,7 +150,7 @@ func (f *Config) Load(name string, v any) error {
 }
 
 // Read 读取文件的原始内容
-func (f *Config) Read(name string) ([]byte, error) { return fs.ReadFile(f, name) }
+func (f *Config) Read(name string) ([]byte, error) { return fs.ReadFile(f.Root().FS(), name) }
 
 // Save 将 v 解码并保存至 name 中
 //
@@ -159,9 +160,10 @@ func (f *Config) Read(name string) ([]byte, error) { return fs.ReadFile(f, name)
 func (f *Config) Save(name string, v any, mode fs.FileMode) error {
 	if s, ok := v.(Sanitizer); ok {
 		if fe := s.SanitizeConfig(); fe != nil {
-			fe.Path = filepath.Join(f.Dir(), name)
+			fe.Path = name
 			return fe
 		}
 	}
-	return f.s.Marshal(filepath.Join(f.Dir(), name), v, mode)
+
+	return f.s.Marshal(f.Root().OpenFile, name, v, mode)
 }

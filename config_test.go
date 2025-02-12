@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2019-2024 caixw
+// SPDX-FileCopyrightText: 2019-2025 caixw
 //
 // SPDX-License-Identifier: MIT
 
@@ -7,14 +7,10 @@ package config
 import (
 	"encoding/json"
 	"encoding/xml"
-	"io/fs"
-	"strings"
 	"testing"
 
 	"github.com/issue9/assert/v4"
 )
-
-var _ fs.FS = &Config{}
 
 type conf struct {
 	XMLName struct{} `json:"-" xml:"config"`
@@ -27,7 +23,7 @@ func TestAppDir(t *testing.T) {
 	a := assert.New(t, false)
 	c, err := AppDir(nil, "config")
 	a.NotError(err).NotNil(c).
-		True(strings.HasSuffix(c.Dir(), "config"))
+		NotNil(c.Root())
 }
 
 func TestConfig(t *testing.T) {
