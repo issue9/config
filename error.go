@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2019-2024 caixw
+// SPDX-FileCopyrightText: 2019-2026 caixw
 //
 // SPDX-License-Identifier: MIT
 
@@ -18,7 +18,7 @@ type FieldError struct {
 	Value   any    // 字段的原始值
 }
 
-// Sanitizer 对配置文件的数据验证和修正
+// Sanitizer 对配置文件的数据进行验证和修正
 type Sanitizer interface {
 	// SanitizeConfig 验证当前对象的数据
 	//

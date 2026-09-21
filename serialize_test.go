@@ -5,7 +5,7 @@
 package config
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"encoding/xml"
 	"testing"
 
@@ -21,7 +21,7 @@ func TestSerializer(t *testing.T) {
 	t.Run("Add", func(t *testing.T) {
 		a := assert.New(t, false)
 
-		s.Add(json.Marshal, json.Unmarshal, ".json", "js")
+		s.Add(func(a any) ([]byte, error) { return json.Marshal(a) }, func(b []byte, a any) error { return json.Unmarshal(b, a) }, ".json", "js")
 		a.True(s.Exists("json")).
 			True(s.Exists(".js")).
 			Equal(2, s.Len())

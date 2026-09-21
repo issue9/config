@@ -5,7 +5,7 @@
 package config
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"encoding/xml"
 	"testing"
 
@@ -40,7 +40,7 @@ func TestConfig(t *testing.T) {
 	a.ErrorString(c.Load("config.json", obj), "not found serializer for ")
 
 	c.Serializer().Add(xml.Marshal, xml.Unmarshal, ".xml").
-		Add(json.Marshal, json.Unmarshal, ".json", ".js")
+		Add(func(a any) ([]byte, error) { return json.Marshal(a) }, func(b []byte, a any) error { return json.Unmarshal(b, a) }, ".json", ".js")
 
 	obj1 := &conf{}
 	a.NotError(c.Load("config.json", obj))
