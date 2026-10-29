@@ -1,9 +1,9 @@
 languages:
-    - und
+- und
 messages:
-    - key: '%s at %s:%s'
-      message:
-        msg: '%s at %s:%s'
-    - key: not found serializer for %s
-      message:
-        msg: not found serializer for %s
+- key: "%s at %s:%s"
+  message:
+    msg: "%s at %s:%s"
+- key: not found serializer for %s
+  message:
+    msg: not found serializer for %s

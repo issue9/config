@@ -1,9 +1,9 @@
-// SPDX-FileCopyrightText: 2019-2025 caixw
+// SPDX-FileCopyrightText: 2019-2026 caixw
 //
 // SPDX-License-Identifier: MIT
 
-//go:generate web locale -l=und -f=yaml ./
-//go:generate web update-locale -src=./locales/und.yaml -dest=./locales/zh.yaml
+//go:generate gomsgs extract -l=und -f=yaml ./
+//go:generate gomsgs update -src=./locales/und.yaml -dest=./locales/zh.yaml
 
 // Package config 提供了对多种格式配置文件的支持
 package config
