@@ -7,7 +7,7 @@ package config
 import (
 	"testing"
 
-	"github.com/issue9/assert/v5"
+	"github.com/issue9/assert/v6"
 	"github.com/issue9/localeutil"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
